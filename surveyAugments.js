@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	// If a first argument is given, only bonuses with matching text in the property name will be shown. E.g. 'str'
 	const textFilter = ns.args.length > 0 ? ns.args[0] : "" /*String.includes("") always matches*/;

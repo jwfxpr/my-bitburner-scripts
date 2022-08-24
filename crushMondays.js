@@ -1,4 +1,4 @@
-import {cityNames} from "database.js"
+import { cityNames } from "database.js"
 
 /** @typedef {Object} EmployeeProductivity
  *  @property {Number} operations
@@ -17,7 +17,7 @@ import {cityNames} from "database.js"
  */
 //  *  @property {Number} 
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("sleep");
 	ns.tail();
@@ -37,7 +37,7 @@ export async function main(ns) {
 		const hasWarehouseAPI = ns.corporation.hasUnlockUpgrade("Warehouse API");
 
 		for (const div of ns.corporation.getCorporation().divisions) {
-				// TODO
+			// TODO
 			if (hasWarehouseAPI) {
 				// Initialise division in cache object if necessary
 				if (!Object.keys(productsInDevelopment).includes(div.name)) { productsInDevelopment[div.name] = new Set(); }
@@ -83,14 +83,16 @@ export async function main(ns) {
 				});
 
 			// Ensure all cities have a warehouse
-			cityNames.filter((cityName) => !ns.corporation.hasWarehouse(div.name, cityName))
-				.forEach((cityName) => {
-					if (ns.corporation.getPurchaseWarehouseCost() <= ns.corporation.getCorporation().funds) {
-						const parameters = [div.name, cityName];
-						ns.print("Purchasing warehouse: ", parameters.join(", "));
-						ns.corporation.purchaseWarehouse(...parameters);
-					}
-				})
+			if (hasWarehouseAPI) {
+				cityNames.filter((cityName) => !ns.corporation.hasWarehouse(div.name, cityName))
+					.forEach((cityName) => {
+						if (ns.corporation.getPurchaseWarehouseCost() <= ns.corporation.getCorporation().funds) {
+							const parameters = [div.name, cityName];
+							ns.print("Purchasing warehouse: ", parameters.join(", "));
+							ns.corporation.purchaseWarehouse(...parameters);
+						}
+					})
+			}
 
 			// Manage existing offices and employees
 			if (hasOfficeAPI && ns.corporation.getCorporation().state === "EXPORT") {
@@ -160,7 +162,7 @@ export async function main(ns) {
 						.forEach((alloc) => alloc.staff
 							.filter((_emp) => _emp.info.pos !== alloc.job
 								// && !employeeJobsInQueue.some((cache) => _emp.info.name !== cache[2] && alloc.job !== cache[3])
-								)
+							)
 							.forEach((_emp) => {
 								const parameters = [div.name, city.name, _emp.info.name, alloc.job];
 								if (!employeeJobsInQueue.some((cache) => cache.every((item) => parameters.includes(item)))) {
@@ -186,7 +188,7 @@ export async function main(ns) {
 						["uPgrade: Capacity.I", 120000],
 						["uPgrade: Capacity.II", 130000],
 						["Self-Correcting Assemblers", 125000],
-						
+
 						["JoyWire", 120000],
 						["Automatic Drug Administration", 135000],
 						["CPH4 Injections", 125000],
@@ -208,7 +210,7 @@ export async function main(ns) {
 						["Automatic Drug Administration", 35000],
 						["CPH4 Injections", 25000],
 						["Go-Juice", 25000],
-						
+
 						["Market-TA.I", 70000],
 						["Market-TA.II", 50000],
 					];
@@ -259,7 +261,7 @@ export async function main(ns) {
 	}
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {Employee} emp
  *  @param {Division} division
  *  @returns {EmployeeProductivity}
@@ -276,15 +278,15 @@ function calculateProductivity(ns, emp, division) {
 	const effEff = emp.eff * (1 + 0.1 * ns.corporation.getUpgradeLevel("FocusWires")) * cph4 * overclock;
 	const prodBase = 1;//emp.mor * emp.hap * emp.ene * 1e-6; // These factors are not relevant to my logic
 	return {
-		operations:               prodBase * (0.6 * effInt + 0.1 * effCha +       emp.exp + 0.5 * effCre +       effEff),
-		engineer:                 prodBase * (      effInt + 0.1 * effCha + 1.5 * emp.exp +                      effEff),
-		business:                 prodBase * (0.4 * effInt +       effCha + 0.5 * emp.exp),
-		management:               prodBase * (               2.0 * effCha +       emp.exp + 0.2 * effCre + 0.7 * effEff),
-		"research & development": prodBase * (1.5 * effInt +                0.8 * emp.exp +       effCre + 0.5 * effEff),
+		operations: prodBase * (0.6 * effInt + 0.1 * effCha + emp.exp + 0.5 * effCre + effEff),
+		engineer: prodBase * (effInt + 0.1 * effCha + 1.5 * emp.exp + effEff),
+		business: prodBase * (0.4 * effInt + effCha + 0.5 * emp.exp),
+		management: prodBase * (2.0 * effCha + emp.exp + 0.2 * effCre + 0.7 * effEff),
+		"research & development": prodBase * (1.5 * effInt + 0.8 * emp.exp + effCre + 0.5 * effEff),
 	}
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {String} divisionName
  *  @returns {Boolean}
  */

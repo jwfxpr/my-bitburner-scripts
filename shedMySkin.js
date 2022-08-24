@@ -1,6 +1,6 @@
 import {divestAll, checkTix} from "invest.js"
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.killall("home", true);
 
@@ -11,9 +11,7 @@ export async function main(ns) {
 		}
 		ns.hacknet.spendHashes("Sell for Money", "", Math.floor(ns.hacknet.numHashes() / 4));
 	}
-	if (ns.stock.hasTIXAPIAccess()) {
-		if (checkTix(ns, false)) divestAll(ns);
-	}
+	if (checkTix(ns, false)) divestAll(ns);
 	
 	// Spend remaining eddies on ram & cores
 	while (ns.getPlayer().money >= Math.min(ns.singularity.getUpgradeHomeCoresCost(), ns.singularity.getUpgradeHomeRamCost())) {

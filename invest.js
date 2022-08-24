@@ -18,7 +18,7 @@ import {decimalStringToNumber, requireBitNodeOrSource} from "helperlib.js"
  *  @property {Number} askPrice
  */
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("sleep");
 	ns.tail();
@@ -100,7 +100,7 @@ export function divestAll(ns) {
 			.forEach((info) => ns.stock.sellShort(info.sym, info.position.shortShares));
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {String} sym
  *  @returns {Position}
  */
@@ -115,7 +115,7 @@ function getStockPosition(ns, sym) {
 	};
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {String} sym
  *  @returns {StockInfo}
  */
@@ -130,11 +130,11 @@ export function symbolToInfo(ns, sym) {
 	};
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @returns {Boolean}
  */
 export function checkTix(ns, report = true) {
-	const access = ns.stock.hasTIXAPIAccess();
+	const access = ns.stock.has4SDataTIXAPI();
 	if (report)	ns.print(access ? "TIX API access confirmed." : "ERROR: No TIX API access.");
 	return access;
 }

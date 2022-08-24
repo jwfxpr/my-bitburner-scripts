@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	// Host discovery
 	let allHostnames = ns.scan();
@@ -20,7 +20,7 @@ export async function main(ns) {
 			});
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
   * @param {string} target
   * @param {string[]} allHosts */
 function recurseScan(ns, target, allHosts) {

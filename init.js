@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	const growThreads = 2;
 	const megalithThreads = 20;

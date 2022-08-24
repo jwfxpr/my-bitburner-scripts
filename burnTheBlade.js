@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("sleep");
 	ns.disableLog("bladeburner.setTeamSize");
@@ -75,7 +75,7 @@ export async function main(ns) {
 	}
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {BladeburnerCurAction} oldAction
  *  @param {BladeburnerCurAction} newAction
  *  @return {Boolean}
@@ -93,7 +93,7 @@ function shouldChangeAction(ns, oldAction, newAction) {
 	return (currentTime < (actionTime * 0.5)); // Change if in first half
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {String}
 */
 function chooseBestSkill(ns) {
@@ -124,7 +124,7 @@ function chooseBestSkill(ns) {
 	return highSkills.sort((a, b) => bb.getSkillUpgradeCost(a) - bb.getSkillUpgradeCost(b))[0]
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {BladeburnerCurAction}
 */
 function chooseLowStaminaTask(ns) {
@@ -143,7 +143,7 @@ function chooseLowStaminaTask(ns) {
 	return { name: "Hyperbolic Regeneration Chamber", type: "General" };
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {BladeburnerCurAction}
 */
 function chooseHighStaminaTask(ns) {
@@ -225,7 +225,7 @@ function chooseHighStaminaTask(ns) {
 	return filteredActions[0];
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {Number}
 */
 function getCurrentUncertainty(ns) {
@@ -240,7 +240,7 @@ function getCurrentUncertainty(ns) {
 	return Math.max(maxOpsUncertainty, blopUncertainty);
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {String|undefined}
 */
 export function getCurrentBlackOp(ns) {
@@ -255,7 +255,7 @@ export function getCurrentBlackOp(ns) {
 	return remainingBlops[0];
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {BladeburnerCurAction[]}
 */
 function getOps(ns) {
@@ -263,7 +263,7 @@ function getOps(ns) {
 	return getOpsNames(ns).map((op) => { return { type: "Operation", name: op } });
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @return {String[]}
 */
 function getOpsNames(ns) {

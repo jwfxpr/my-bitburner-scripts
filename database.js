@@ -17,9 +17,11 @@
  *  @property {String} name
  */
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
-
+	const message = "This is a library module, not a script. Do not run directly; rather, import functions into other scripts as needed.";
+	ns.tprint(message);
+	ns.print(message);
 }
 
 /** @returns {Cities} */

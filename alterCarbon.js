@@ -1,3 +1,5 @@
+import { cityNames } from "database.js"
+
 /**
  * @typedef {Object} SleeveData
  * @property {Number} index
@@ -9,7 +11,7 @@
 
 import { bestGym, bestUniversity } from "database.js"
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("sleep");
 	ns.tail();
@@ -46,7 +48,12 @@ export async function main(ns) {
 	}
 
 	while (true) {
-		getSleeves(ns).forEach((thisSleeve) => {
+		// Join all available factions except city factions.
+		const cities = cityNames();
+		ns.singularity.checkFactionInvitations().filter((fac) => !cities.includes(fac))
+			.forEach((fac) => ns.singularity.joinFaction(fac));
+
+		for (const thisSleeve of getSleeves(ns)) {
 			// First up: Manage sync
 			if (doSync(thisSleeve)) {
 				confirmOrAssignTask(ns, { type: "SYNCHRO" }, thisSleeve)
@@ -141,7 +148,7 @@ export async function main(ns) {
 	}
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @returns {SleeveData[]}
 */
 export function getSleeves(ns) {
@@ -152,7 +159,7 @@ export function getSleeves(ns) {
 	return sleeves;
 }
 
-/** @param {NS} ns 
+/** @param {import(".").NS} ns 
  *  @param {Number} idx
  * 	@returns {SleeveData}
 */
@@ -162,7 +169,7 @@ export function getSleeveData(ns, idx) {
 	return { index: idx, name: sleeveName(idx), info: sl.getInformation(idx), stats: sl.getSleeveStats(idx), task: sl.getTask(idx) }
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {SleeveTask} newTask
  *  @param {SleeveData} _sleeve
  *  @param {Boolean} reportFailure
@@ -221,7 +228,7 @@ function confirmOrAssignTask(ns, newTask, _sleeve, reportFailure = true) {
 	return success;
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
  *  @param {String} city
  *  @param {SleeveData} _sleeve
  */

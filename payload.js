@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	let hostname = ns.getHostname();
 	let maxMoney = ns.getServerMaxMoney(hostname);

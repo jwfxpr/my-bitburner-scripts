@@ -1,4 +1,4 @@
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 export async function main(ns) {
 	solveContract(ns, ns.args[0], ns.args[1], 1);
 }
@@ -93,7 +93,7 @@ export function solveContract(ns, host, filename, logLevel=0) {
 }
 
 // The solution in the bitburner source uses a MinHeap class that's implemented in TypeScript... 
-// /** @param {NS} ns **/
+// /** @param {import(".").NS} ns **/
 // function shortestPathInAGrid(ns, data) {
 // 	const width = data[0].length;
 // 	const height = data.length;
@@ -176,7 +176,7 @@ export function solveContract(ns, host, filename, logLevel=0) {
 // 	return ansY == dstY && ansX == dstX;
 // }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function graph2coloring(ns, data) {
 	//Helper function to get neighbourhood of a vertex
 	function neighbourhood(vertex) {
@@ -225,7 +225,7 @@ function graph2coloring(ns, data) {
 	return "" + coloring;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function sanitizeParentheses(ns, data) {
 	var context = {"maxLeftLength":0}
 	var exprs = findSanitized(ns, data, 0, context);
@@ -286,7 +286,7 @@ function validateParentheses(s) {
 	return n == 0;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function findAllValidMathExpr(ns, data) {
 	var s = data[0];
 	var n = data[1];
@@ -333,7 +333,7 @@ function findExpr(s, n, expr) {
 	return results;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function mergeOverlappingIntervals(ns, data) {
 	var intervals = data.slice();
 	for (var i=0; i<intervals.length;i++) {
@@ -359,7 +359,7 @@ function mergeInterval(a, b) {
 	return [Math.min(a[0], b[0]), Math.max(a[1], b[1])];
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function generateIpAddresses(ns, data) {
 	return parseIpNum(ns, data, []);
 }
@@ -396,7 +396,7 @@ function parseIpNum(ns, s, parts) {
 	return results;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function uniquePathInGrid2(ns, data) {
 	var maxY=data.length;
 	var maxX=data[0].length;
@@ -440,7 +440,7 @@ function countPathInGrid(data, x, y) {
 	}
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function subarrayWithMaxSum(ns, data) {
 	return findMaxSubArraySum(data);
 }
@@ -463,7 +463,7 @@ function findMaxSubArraySum(arr) {
 	return sum;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function arrayJumpingGame(ns, data) {
 	return findJump(data, 0);
 }
@@ -481,7 +481,7 @@ function findJump(data, pos) {
 	return 0;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function algorithmicStockTrader1(ns, data) {
 	if (data.length == 0) {
 		return 0;
@@ -492,7 +492,7 @@ function algorithmicStockTrader1(ns, data) {
 	return profit;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function algorithmicStockTrader2(ns, data) {
 	if (data.length == 0) {
 		return 0;
@@ -502,7 +502,7 @@ function algorithmicStockTrader2(ns, data) {
 	return profit;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function algorithmicStockTrader3(ns, data) {
 	if (data.length == 0) {
 		return 0;
@@ -513,7 +513,7 @@ function algorithmicStockTrader3(ns, data) {
 	return maxProfit(chances, 2);
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function algorithmicStockTrader4(ns, data) {
 	if (data[1].length == 0) {
 		return 0;
@@ -582,7 +582,7 @@ function mergeChances(chances) {
 	return mc;
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function minPathSumInTriangle(ns, data) {
 	var length = data.length;
 	if (length == 1) {
@@ -600,7 +600,7 @@ function minPathSumInTriangle(ns, data) {
 	return r[0];
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 function largestPrimeFactor(ns, data) {
 	var factor = 0;
 	var k = data;

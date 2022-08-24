@@ -1,6 +1,6 @@
 // TODO this is currently completely broken, delete or fix
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	if (ns.args.length < 1) {
 		ns.tprint("Target required.");

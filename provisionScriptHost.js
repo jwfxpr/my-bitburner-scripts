@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	if (ns.args.length < 1 || !ns.fileExists(ns.args[0] + ".js", "home")) {
 		ns.tprint("You must provide an argument which is the name of a script (without '.js').");
@@ -55,7 +55,7 @@ export async function main(ns) {
 	}
 }
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 function tryPurchase(ns, baseName, ram) {
 	if (ns.getPurchasedServerCost(ram) > ns.getPlayer().money) {
 		ns.tprintf("Unable to purchase server for '%s', can't afford it ($%s)", baseName, ns.nFormat(ns.getPurchasedServerCost(ram), "0.000a"));

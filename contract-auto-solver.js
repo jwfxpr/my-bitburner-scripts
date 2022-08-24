@@ -1,6 +1,6 @@
 import {solveContract} from "solve-contract.js"
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 export async function main(ns) {
 	ns.disableLog("sleep");
 	// ns.tail();
@@ -10,7 +10,7 @@ export async function main(ns) {
 	}
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 async function dfs(ns, parent, current, f, depth, ...args) {
 	var hosts = ns.scan(current);
 	if (parent != null) {
@@ -28,7 +28,7 @@ async function dfs(ns, parent, current, f, depth, ...args) {
 	}
 }
 
-/** @param {NS} ns **/
+/** @param {import(".").NS} ns **/
 async function trySolveContracts(ns, host, depth) {
 	var contracts = ns.ls(host, "cct");
 	for (var contract of contracts) {

@@ -1,6 +1,9 @@
-// TODO autocomplete
+export function autocomplete(data, args) {
+	return ["money", "karma", "hacking_exp", "strength_exp", "defense_exp",
+		"dexterity_exp", "agility_exp", "charisma_exp", "intelligence_exp", "kills"];
+}
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("sleep");
 	
@@ -54,7 +57,7 @@ export async function main(ns) {
 		const crimeFiltered = crimeChances;//.filter((crime) => crime.chance > 0.2);
 
 		const bestCrime = crimeFiltered.length > 1 ? crimeFiltered[0] : crimeChances[0];
-		ns.printf('\nBest crime: %s, $%s @ %s%% / %s', bestCrime.name, ns.nFormat(bestCrime.money, "0.000a"), ns.nFormat(bestCrime.chance * 100, "0.00a"), ns.tFormat(bestCrime.time));
+		ns.printf('Best crime: %s, $%s @ %s%% / %s', bestCrime.name, ns.nFormat(bestCrime.money, "0.000a"), ns.nFormat(bestCrime.chance * 100, "0.00a"), ns.tFormat(bestCrime.time));
 		const currentWork = ns.singularity.getCurrentWork();
 		if (currentWork === null || currentWork.type !== "CRIME" || currentWork.crimeType !== bestCrime.name.toUpperCase()) {
 			if (goal !== "karma" && idealCrime.name == bestCrime.name && bestCrime.chance == 1) {

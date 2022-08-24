@@ -1,4 +1,4 @@
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	// General approach inspired by
 	// https://www.reddit.com/r/Bitburner/comments/tuw2fc/comment/i366768/?utm_source=share&utm_medium=web2x&context=3

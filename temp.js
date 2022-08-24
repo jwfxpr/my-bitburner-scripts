@@ -3,7 +3,7 @@
 // import {symbolToInfo} from "invest.js"
 // import {cityNames} from "database.js"
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.tprint(ns.corporation.getResearchNames());
 	// const seconds = [60*60, 60, 59];

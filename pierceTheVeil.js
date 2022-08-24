@@ -1,8 +1,8 @@
 import {getCurrentBlackOp} from "burnTheBlade.js";
 import {corruptText} from "helperlib.js"
-import {symbolToInfo} from "invest.js"
+import { symbolToInfo, checkTix } from "invest.js"
 
-/** @param {NS} ns */
+/** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("ALL");
 
@@ -74,7 +74,7 @@ export async function main(ns) {
 			);
 
 			// Stock
-			if (ns.stock.hasTIXAPIAccess()) {
+			if (checkTix(ns, false)) {
 				const stockValues = ns.stock.getSymbols().map((sym) => symbolToInfo(ns, sym))
 					.map((info) => info.position.longShares * info.bidPrice + info.position.shortShares * info.askPrice)
 					.filter((val) => val !== 0);
@@ -297,7 +297,7 @@ export async function main(ns) {
 	}
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
   * @param {string} target
   * @param {string[]} allHosts */
 function recurseScan(ns, target, allHosts) {
@@ -311,7 +311,7 @@ function recurseScan(ns, target, allHosts) {
 	}
 }
 
-/** @param {NS} ns
+/** @param {import(".").NS} ns
   * @param {Number} seconds
   * @return {String} */
 function secondsToShortTime(ns, seconds) {
