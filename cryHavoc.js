@@ -110,14 +110,16 @@ export async function main(ns) {
 	report(ns, "He wept, for there were no more worlds to conquer.");
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   *  */
 function report(ns, ...args) {
 	ns.printf(...args);
 	ns.tprintf(...args);
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {string} target */
 async function payload(ns, target) {
 	const maxMoney = ns.getServerMaxMoney(target);
@@ -137,7 +139,8 @@ async function payload(ns, target) {
 	[8, 4, 1].forEach((threads) => { while (ns.exec(payload, target, threads, target, minMoney * threads, i++) > 0) { } })
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {string} target
   * @param {string[]} allHosts */
 function recurseScan(ns, target, allHosts) {

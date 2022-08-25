@@ -34,8 +34,8 @@ export async function main(ns) {
 		.filter((entry) => includeFilters.some((_filter) => entry[0].includes(_filter)) && (typeof entry[1] === "number"))
 		.map((entry) => entry[1])
 		.reduce((a, b) => a * b, 1);
-	// Local function to determine if an aug is affordable
-	const canAffordAug = (aug) => aug.cost < (ns.getPlayer().money * 0.1);
+	// Local function to determine if an aug is affordable.
+	const canAffordAug = (aug) => aug.cost < (ns.getPlayer().money * 0.1 / sl.getNumSleeves());
 
 	// Crime and murder
 	const doMurderRampage = () => !ns.gang.inGang() && ns.heart.break() < 54000;
@@ -142,13 +142,14 @@ export async function main(ns) {
 				travelTo(ns, bestUniversity.city, thisSleeve);
 				confirmOrAssignTask(ns, { type: "CLASS", placeType: "UNI", classType: "LEADERSHIP", location: bestUniversity.name }, thisSleeve);
 			}
-		});
+		}
 
 		await ns.sleep(5000);
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {SleeveData[]}
 */
 export function getSleeves(ns) {
@@ -159,7 +160,8 @@ export function getSleeves(ns) {
 	return sleeves;
 }
 
-/** @param {import(".").NS} ns 
+/**
+ *  @param {import(".").NS} ns 
  *  @param {Number} idx
  * 	@returns {SleeveData}
 */
@@ -169,7 +171,8 @@ export function getSleeveData(ns, idx) {
 	return { index: idx, name: sleeveName(idx), info: sl.getInformation(idx), stats: sl.getSleeveStats(idx), task: sl.getTask(idx) }
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {SleeveTask} newTask
  *  @param {SleeveData} _sleeve
  *  @param {Boolean} reportFailure
@@ -228,7 +231,8 @@ function confirmOrAssignTask(ns, newTask, _sleeve, reportFailure = true) {
 	return success;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {String} city
  *  @param {SleeveData} _sleeve
  */
@@ -247,7 +251,8 @@ function travelTo(ns, city, _sleeve) {
 	}
 }
 
-/** @param {Number} idx
+/**
+ *  @param {Number} idx
  *  @returns {String}
  */
 function sleeveName(idx) {

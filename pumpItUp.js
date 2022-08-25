@@ -22,7 +22,8 @@ export async function main(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {String}
  */
 function getGym(ns) {

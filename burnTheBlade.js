@@ -1,3 +1,5 @@
+import { cityNames } from "database.js"
+
 /** @param {import(".").NS} ns */
 export async function main(ns) {
 	ns.disableLog("sleep");
@@ -21,6 +23,10 @@ export async function main(ns) {
 		await ns.sleep(30000);
 	}
 
+	const allCities = cityNames
+	const cityPopOkayThreshold = 1e9; // 1 billion
+	const cityChaosOkayThreshold = 50;
+
 	const highStaminaThreshold = 0.99;
 	const lowStaminaThreshold = 0.5;
 	let staminaHigh = true;
@@ -28,34 +34,33 @@ export async function main(ns) {
 		// Handle skills
 		const bestSkill = chooseBestSkill(ns);
 		if (bb.getSkillUpgradeCost(bestSkill) <= bb.getSkillPoints()) {
-			bb.upgradeSkill(bestSkill);
+			const toLevel = bb.getSkillLevel(bestSkill) + 1;
+			const success = bb.upgradeSkill(bestSkill);
+			const message = (success ? `BB: Upgraded skill ` : `BB: Failed to upgrade skill `) + bestSkill + " to level " + toLevel;
+			ns.toast(message, success ? ns.enums.toast.SUCCESS : ns.enums.toast.ERROR, 30000);
 		}
 
 		// Handle city
-		const cities = ["Sector-12", "Chongqing", "New Tokyo", "Ishima", "Aevum", "Volhaven"];
 		const currentCity = bb.getCity();
-		const minCityPop = 1e9; // 1 billion
-		const maxCityChaos = 50;
 		// If inciting violence, move to an unimportant city
 		if (bb.getCurrentAction().name == "Incite Violence") {
-			const bestCity = cities.sort((a, b) => bb.getCityEstimatedPopulation(a) - bb.getCityEstimatedPopulation(b))[0];
+			const bestCity = allCities.sort((a, b) => bb.getCityEstimatedPopulation(a) - bb.getCityEstimatedPopulation(b))[0];
 			if (bestCity != currentCity) {
 				bb.switchCity(bestCity);
 			}
 		// Otherwise, consider a move if the current city is too small or too chaotic
-		} else if (bb.getCityEstimatedPopulation(currentCity) < 1e9 || bb.getCityChaos(currentCity) > maxCityChaos) {
-			const sortedCities = cities.sort((a, b) => bb.getCityEstimatedPopulation(b) - bb.getCityEstimatedPopulation(a));
-			const filteredCities = sortedCities.filter((city) => bb.getCityEstimatedPopulation(city) > minCityPop)
+		} else if (bb.getCityEstimatedPopulation(currentCity) < cityPopOkayThreshold || bb.getCityChaos(currentCity) > cityChaosOkayThreshold) {
+			const sortedCities = allCities.sort((a, b) => bb.getCityEstimatedPopulation(b) - bb.getCityEstimatedPopulation(a));
+			const filteredCities = sortedCities.filter((city) => bb.getCityEstimatedPopulation(city) >= cityPopOkayThreshold)
 				.sort((a, b) => bb.getCityChaos(a) - bb.getCityChaos(b));
-			const bestCity = filteredCities.length > 0 ? filteredCities[0] : sortedCities[0];
+			const bestCity = filteredCities[0] ?? sortedCities[0];
 			if (bestCity != currentCity) {
 				bb.switchCity(bestCity);
 			}
 		}
 
 		// Handle stamina
-		const stamina = bb.getStamina()[0];
-		const maxStamina = bb.getStamina()[1];
+		const [stamina, maxStamina] = bb.getStamina();
 		if (staminaHigh) {
 			if (stamina < Math.ceil(maxStamina * lowStaminaThreshold)) {
 				staminaHigh = false;
@@ -75,7 +80,8 @@ export async function main(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {BladeburnerCurAction} oldAction
  *  @param {BladeburnerCurAction} newAction
  *  @return {Boolean}
@@ -93,7 +99,8 @@ function shouldChangeAction(ns, oldAction, newAction) {
 	return (currentTime < (actionTime * 0.5)); // Change if in first half
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {String}
 */
 function chooseBestSkill(ns) {
@@ -124,7 +131,8 @@ function chooseBestSkill(ns) {
 	return highSkills.sort((a, b) => bb.getSkillUpgradeCost(a) - bb.getSkillUpgradeCost(b))[0]
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {BladeburnerCurAction}
 */
 function chooseLowStaminaTask(ns) {
@@ -143,7 +151,8 @@ function chooseLowStaminaTask(ns) {
 	return { name: "Hyperbolic Regeneration Chamber", type: "General" };
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {BladeburnerCurAction}
 */
 function chooseHighStaminaTask(ns) {
@@ -225,7 +234,8 @@ function chooseHighStaminaTask(ns) {
 	return filteredActions[0];
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {Number}
 */
 function getCurrentUncertainty(ns) {
@@ -240,7 +250,8 @@ function getCurrentUncertainty(ns) {
 	return Math.max(maxOpsUncertainty, blopUncertainty);
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {String|undefined}
 */
 export function getCurrentBlackOp(ns) {
@@ -255,7 +266,8 @@ export function getCurrentBlackOp(ns) {
 	return remainingBlops[0];
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {BladeburnerCurAction[]}
 */
 function getOps(ns) {
@@ -263,7 +275,8 @@ function getOps(ns) {
 	return getOpsNames(ns).map((op) => { return { type: "Operation", name: op } });
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @return {String[]}
 */
 function getOpsNames(ns) {

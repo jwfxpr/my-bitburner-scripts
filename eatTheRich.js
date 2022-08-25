@@ -36,7 +36,8 @@ export async function main(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {string} target
   * @param {string[]} allHosts */
 function recurseScan(ns, target, allHosts) {

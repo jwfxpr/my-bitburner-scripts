@@ -1,6 +1,7 @@
 import {decimalStringToNumber, requireBitNodeOrSource} from "helperlib.js"
 
-/** @typedef {Object} Position
+/**
+ *  @typedef {Object} Position
  *  @property {Number} longShares
  *  @property {Number} longAvgPrice
  *  @property {Number} shortShares
@@ -9,7 +10,8 @@ import {decimalStringToNumber, requireBitNodeOrSource} from "helperlib.js"
  *  @property {Number} remainingShares
  */
 
-/** @typedef {Object} StockInfo
+/**
+ *  @typedef {Object} StockInfo
  *  @property {String} sym
  *  @property {Position} position
  *  @property {Number} forecast
@@ -47,7 +49,7 @@ export async function main(ns) {
 		.reduce((a, b) => a + b, 0);
 	const commission = 100000; // $100,000 brokerage fee on all buy and sell actions
 	const safeForecastMargin = 0.1; // Only consider stocks at least this much either side of 0.5 forecast
-	const minTransactionValue = 1000000;
+	const minTransactionValue = 10000000;
 
 	
 	while (true) {
@@ -100,7 +102,8 @@ export function divestAll(ns) {
 			.forEach((info) => ns.stock.sellShort(info.sym, info.position.shortShares));
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {String} sym
  *  @returns {Position}
  */
@@ -115,7 +118,8 @@ function getStockPosition(ns, sym) {
 	};
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {String} sym
  *  @returns {StockInfo}
  */
@@ -130,7 +134,8 @@ export function symbolToInfo(ns, sym) {
 	};
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {Boolean}
  */
 export function checkTix(ns, report = true) {

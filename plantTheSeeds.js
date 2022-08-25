@@ -1,11 +1,13 @@
-/** @typedef {Object} NodeUpgradeInfo
+/**
+ *  @typedef {Object} NodeUpgradeInfo
  *  @property {String} target
  *  @property {Number} cost
  *  @property {Number} roi
  *  @property {Number} newGainRate
  */
 
-/** @typedef {Object} NodeUpgrade
+/**
+ *  @typedef {Object} NodeUpgrade
  *  @property {Number} index
  *  @property {NodeStats} node
  *  @property {NodeUpgradeInfo} info
@@ -110,7 +112,8 @@ export async function main(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {Number}
  */
 function getCashFloat(ns) {
@@ -131,14 +134,16 @@ function getCashFloat(ns) {
 	return Math.max(cashFloatMin, cashFloatPerLevel * level + cashFloatBase);
 }
 
-/** @param {number} num 
+/**
+ *  @param {number} num 
  *  @returns {string}
 */
 function ppMoney(num) {
 	return '$' + ppNum(num);
 }
 
-/** @param {number} num 
+/**
+ *  @param {number} num 
  *  @returns {string}
 */
 function ppNum(num) {
@@ -153,7 +158,8 @@ function ppNum(num) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {Number} maxLevel
  *  @param {Number} maxRam
  *  @param {Number} maxCores
@@ -199,7 +205,8 @@ async function findNewNodeSweetSpot(ns, maxLevel, maxRam, maxCores) {
 	return {level: level, ram: ram, cores: cores, cost: totalCost, roi: currentROI, gainRate: calcHashGainRate(ns, level, ram, cores)};
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {Number} level
  *  @param {Number} ram
  *  @param {Number} cores
@@ -211,7 +218,8 @@ function calculateNewNodeCostWithConfig(ns, level, ram, cores) {
 				+ calcCoreUpgradeCost(ns, 1, cores - 1);
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {Number} requiredMoney
  *  @returns {Promise<Boolean>}
  * */
@@ -230,7 +238,8 @@ async function waitForBudget(ns, requiredMoney) {
 	return true;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {NodeStats} node
  *  @returns {NodeUpgrade}
  * */
@@ -238,7 +247,8 @@ async function calculateBestUpgradeForNode(ns, node) {
 	return await calculateBestUpgradeForStats(ns, node.level, node.ram, node.cores);
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {Number} level
  *  @param {Number} ram
  *  @param {Number} cores
@@ -312,7 +322,8 @@ async function calculateBestUpgradeForStats(ns, level, ram, cores, considerSweet
 	return bestUpgrade;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {NodeStats[]}
  */
 function getCurrentNodes(ns) {
@@ -328,14 +339,16 @@ function getCurrentNodes(ns) {
 	return nodes;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {Number}
  */
 function getBudget(ns) {
 	return Math.max(0, ns.getPlayer().money - getCashFloat(ns));
 }
 
-/** @param {import(".").NS} ns 
+/**
+ *  @param {import(".").NS} ns 
  *  @param {number} level
  *  @param {number} ram
  *  @param {number} cores
@@ -345,7 +358,8 @@ function calcHashGainRate(ns, level, ram, cores) {
 	return ns.formulas.hacknetServers.hashGainRate(level, 0, ram, cores);
 }
 
-/** @param {import(".").NS} ns 
+/**
+ *  @param {import(".").NS} ns 
  *  @param {number} startingLevel
  *  @param {number} extraLevels
  *  @returns {Number}
@@ -354,7 +368,8 @@ function calcLevelUpgradeCost(ns, startingLevel, extraLevels = 1) {
 	return ns.formulas.hacknetServers.levelUpgradeCost(startingLevel, extraLevels);
 }
 
-/** @param {import(".").NS} ns 
+/**
+ *  @param {import(".").NS} ns 
  *  @param {number} startingRam
  *  @param {number} extraRam
  *  @returns {Number}
@@ -363,7 +378,8 @@ function calcRamUpgradeCost(ns, startingRam, extraRam = 1) {
 	return ns.formulas.hacknetServers.ramUpgradeCost(startingRam, extraRam);
 }
 
-/** @param {import(".").NS} ns 
+/**
+ *  @param {import(".").NS} ns 
  *  @param {number} startingCores
  *  @param {number} extraCores
  *  @returns {Number}
@@ -372,7 +388,8 @@ function calcCoreUpgradeCost(ns, startingCores, extraCores = 1) {
 	return ns.formulas.hacknetServers.coreUpgradeCost(startingCores, extraCores);
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {number} startingCache
  *  @param {number} extraCache
  *  @returns {Number}
@@ -381,7 +398,8 @@ function calcCacheUpgradeCost(ns, startingCache, extraCache = 1) {
 	return ns.formulas.hacknetServers.cacheUpgradeCost(startingCache, extraCache);
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {NodeUpgrade} */
 function newNodeUpgrade(ns) {
 	const cost = ns.hacknet.getPurchaseNodeCost();
@@ -398,7 +416,8 @@ function newNodeUpgrade(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {NodeUpgrade} */
 export function getBestUpgradeAllNodes(ns) {
 	const newNode = newNodeUpgrade(ns);
@@ -409,7 +428,8 @@ export function getBestUpgradeAllNodes(ns) {
 	return bestUpgrade.info.cost >= newNode.info.cost ? newNode : bestUpgrade;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {NodeStats} node
  *  @returns {NodeUpgrade} */
 export function getBestUpgradeForNode(ns, node) {
@@ -461,7 +481,8 @@ export function getBestUpgradeForNode(ns, node) {
 		return [lvlUpgrade, ramUpgrade, coreUpgrade].sort((a, b) => b.info.roi - a.info.roi)[0];
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {NodeUpgrade} upgrade
  *  @returns {Boolean} */
 export function doUpgrade(ns, upgrade) {
@@ -494,7 +515,8 @@ export function doUpgrade(ns, upgrade) {
 	}
 }
 
-/** @param {String} name
+/**
+ *  @param {String} name
  *  @returns {Number}
  */
 export function nodeNameToIndex(name) {

@@ -1,4 +1,4 @@
-import {divestAll, checkTix} from "invest.js"
+import {divestAll, checkTix} from "chaseAlpha.js"
 
 /** @param {import(".").NS} ns */
 export async function main(ns) {

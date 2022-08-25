@@ -24,7 +24,7 @@ export async function main(ns) {
 		runScripts.push(["craveChaos.js", 1]);
 		
 	if (ns.getPlayer().bitNodeN == 8) {
-		runScripts.push(["invest.js", 1]);
+		runScripts.push(["chaseAlpha.js", 1]);
 	} else if (ns.stock.hasTIXAPIAccess()) {
 		runScripts.push(["divest.js", 1]);
 	}

@@ -364,7 +364,8 @@ function generateIpAddresses(ns, data) {
 	return parseIpNum(ns, data, []);
 }
 
-/** @param {String} s
+/**
+ *  @param {String} s
  * @Param {Array} parts**/
 function parseIpNum(ns, s, parts) {
 	if (parts.length == 4) {

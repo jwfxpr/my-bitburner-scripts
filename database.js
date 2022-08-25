@@ -1,9 +1,11 @@
-/** @typedef {Object} City
+/**
+ *  @typedef {Object} City
  *  @property {String[]} gyms
  *  @property {String[]} universities
  */
 
-/** @typedef {Object} Cities
+/**
+ *  @typedef {Object} Cities
  *  @property {City} Sector-12
  *  @property {City} Aevum
  *  @property {City} Chongqing
@@ -12,7 +14,8 @@
  *  @property {City} Volhaven
  */
 
-/** @typedef {Object} Location
+/**
+ *  @typedef {Object} Location
  *  @property {String} city
  *  @property {String} name
  */
@@ -36,16 +39,19 @@ function makeCities() {
 	};
 }
 
-/** @constant
+/**
+ *  @constant
  *  @type {Cities} */
 export const cities = makeCities();
 
-/** @constant
+/**
+ *  @constant
  *  @type {String[]}
  */
 export const cityNames = Object.keys(makeCities());
 
-/** @constant
+/**
+ *  @constant
  *  @type {Location} */
 export const bestGym = { city: "Sector-12", name: "Powerhouse Gym" };
 

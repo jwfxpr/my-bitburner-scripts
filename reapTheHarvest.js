@@ -14,12 +14,14 @@ export async function main(ns) {
 	while (true) {
 		
 		if (ns.getPlayer().inBladeburner) {
-			burnTheBlade(ns);
+			burnABlade(ns);
 		}
 		if (ns.singularity.getCurrentWork()?.type === "CLASS") {
 			pushItRealGood(ns);
 		}
-		moreCashLessDash(ns);
+		if (ns.getPlayer().skills.hacking > 500) {
+			moreCashLessDash(ns);
+		}
 		if (ns.getPlayer().hasCorporation) {
 			buyASuit(ns);
 		}
@@ -46,7 +48,8 @@ export async function main(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {Number} money
  *  @return {Boolean}
  */
@@ -64,7 +67,8 @@ export function tryWithdrawal(ns, money) {
 	return true;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  */
 function moreCashLessDash(ns) {
 	const allHostnames = ns.scan();
@@ -96,7 +100,8 @@ function moreCashLessDash(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  */
 function pushItRealGood(ns, limit = 40) {
 	[
@@ -107,23 +112,29 @@ function pushItRealGood(ns, limit = 40) {
 	});
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  */
-function burnTheBlade(ns) {
+function burnABlade(ns) {
 	[
 		"Exchange for Bladeburner Rank",
 		"Exchange for Bladeburner SP"
 	].forEach((upg) => buyIfAffordable(ns, upg));
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  */
 function buyASuit(ns, threshold = 50e9) {
-	if (ns.corporation.getCorporation().funds <= threshold)
+	// Only bother buying funds if they'll have an actual impact on the corporation's wealth.
+	if (ns.corporation.getCorporation().funds <= threshold) {
 		buyIfAffordable(ns, "Sell for Corporation Funds");
+	}
+	buyIfAffordable(ns, "Exchange for Corporation Research");
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {string} upgrade
   * @param {string} detail */
 function buyIfAffordable(ns, upgrade, detail = "") {
@@ -142,7 +153,8 @@ function buyIfAffordable(ns, upgrade, detail = "") {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @returns {NodeStats[]}
  */
 function getCurrentNodes(ns) {
@@ -158,7 +170,8 @@ function getCurrentNodes(ns) {
 	return nodes;
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {string} target
   * @param {string[]} allHosts */
 function recurseScan(ns, target, allHosts) {

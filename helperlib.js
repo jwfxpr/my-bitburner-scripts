@@ -29,7 +29,8 @@ export function corruptText(text, chance = 1/7) {
 	return newText;
 }
 
-/** @param {String} decimalString
+/**
+ *  @param {String} decimalString
  *  @returns {Number}
  */
 export function decimalStringToNumber(decimalString) {
@@ -41,7 +42,8 @@ export function decimalStringToNumber(decimalString) {
 	}
 }
 
-/** @param {String} char
+/**
+ *  @param {String} char
  *  @returns {Number}
  */
 export function charToMagnitude(char) {
@@ -49,7 +51,8 @@ export function charToMagnitude(char) {
 		return Math.pow(1000, magnitudes.indexOf(char) + 1);
 }
 
-/** @param {String} char
+/**
+ *  @param {String} char
  *  @param {Number} bn
  *  @param {Number} minSource
  *  @returns {Boolean}
@@ -57,4 +60,22 @@ export function charToMagnitude(char) {
 export function requireBitNodeOrSource(ns, bn, minSource = 1) {
 	return ns.getPlayer().bitNodeN === bn 
 		|| ns.singularity.getOwnedSourceFiles().some((source) => source.n === bn && source.lvl >= minSource);
+}
+
+const decimalNumberSuffixes = ["", "k", "m", "b", "t", "q", "Q", "s", "S", "o", "n", "D", "uD", "dD", "tD", "qD", "QD", "sD"];
+
+
+/**
+ * Format a large number (> trillions) into `0.000a` format.
+ * @param {Number} number Number to format
+ * @param {Number} precision How many digits after the decimal point to print
+ * @returns {String}
+ */
+export function bigFormat(number, precision = 3) {
+	const magnitude = Math.floor(Math.log10(number) / 3);
+	if (magnitude <= 0)
+		return number.toString();
+	const magnitudeValue = number / (10 ** (3 * magnitude));
+	const valueFixed = magnitudeValue.toFixed(precision);
+	return `${valueFixed}${decimalNumberSuffixes[magnitude]}`;
 }

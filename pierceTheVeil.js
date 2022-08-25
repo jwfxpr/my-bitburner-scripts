@@ -1,6 +1,6 @@
-import {getCurrentBlackOp} from "burnTheBlade.js";
-import {corruptText} from "helperlib.js"
-import { symbolToInfo, checkTix } from "invest.js"
+import { getCurrentBlackOp } from "burnTheBlade.js";
+import { bigFormat, corruptText } from "helperlib.js"
+import { symbolToInfo, checkTix } from "chaseAlpha.js"
 
 /** @param {import(".").NS} ns */
 export async function main(ns) {
@@ -11,9 +11,9 @@ export async function main(ns) {
 	const whiteColour = 'color: #faffdf; ';
 	const redColour = 'color: #dd3434; ';
 	const noColour = '';
-	const numFmt = "0,0[.]00a";
-	const pctFmt = "0,0[.]00%";
-	const moneyFmt = "$0,0[.]00a";
+	const numFmt = "0,0.00a";
+	const pctFmt = "0,0.00%";
+	const moneyFmt = "$0,0.00a";
 	const secondsFmt = "0:00:00";
 
 	const bonusTimeThreshold = 5000;
@@ -81,7 +81,7 @@ export async function main(ns) {
 				if (stockValues.length > 0) {
 					const netWorth = stockValues.reduce((a, b) => a + b, 0);
 					addStat(
-						"Stock",
+						"Pfolio",
 						moneyOrRed(netWorth, netWorth > 0)
 					);
 				}
@@ -169,11 +169,11 @@ export async function main(ns) {
 					"Karma",
 					ns.nFormat(ns.heart.break(), numFmt) + ", " + ns.nFormat(player.numPeopleKilled, "0,0a")
 				);
-			} else if (player.numPeopleKilled > 0 && !player.factions.includes("Speakers for the Dead")) {
-				addStat(
-					"Kills",
-					span(ns.nFormat(player.numPeopleKilled, "0,0a"), player.numPeopleKilled > 30 ? whiteColour : noColour)
-				);
+			// } else if (player.numPeopleKilled > 0 && !player.factions.includes("Speakers for the Dead")) {
+			// 	addStat(
+			// 		"Kills",
+			// 		span(ns.nFormat(player.numPeopleKilled, "0,0a"), player.numPeopleKilled > 30 ? whiteColour : noColour)
+			// 	);
 			}
 			// if (player.numPeopleKilled > 0 && player.numPeopleKilled < 30) {
 			// 	addStat(
@@ -184,8 +184,8 @@ export async function main(ns) {
 
 			if (ns.getPlayer().hasCorporation) {
 				const corp = ns.corporation.getCorporation();
-				const data = corp.public ? span(ns.nFormat(corp.dividendEarnings, moneyFmt), moneyColour) + metricSpace(corp.dividendEarnings) + "/s"
-					: span(ns.nFormat(ns.corporation.getInvestmentOffer().funds, moneyFmt), moneyColour);
+				const data = corp.public ? span(bigFormat(corp.dividendEarnings, 2), moneyColour) + metricSpace(corp.dividendEarnings) + "/s"
+					: span(bigFormat(ns.corporation.getInvestmentOffer().funds, 2), moneyColour);
 				addStat(
 					"Corp",
 					data
@@ -261,6 +261,7 @@ export async function main(ns) {
 					break;
 				case null:
 				case undefined:
+					// TODO: This currently shows 'Idle' when doing BB actions without The Blade's Simulacrum
 					addStat(span("Idle", redColour));
 					break;
 				default: // Print unknown work types for investigation
@@ -297,7 +298,8 @@ export async function main(ns) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {string} target
   * @param {string[]} allHosts */
 function recurseScan(ns, target, allHosts) {
@@ -311,7 +313,8 @@ function recurseScan(ns, target, allHosts) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
   * @param {Number} seconds
   * @return {String} */
 function secondsToShortTime(ns, seconds) {

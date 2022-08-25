@@ -1,6 +1,7 @@
 import { cityNames } from "database.js"
 
-/** @typedef {Object} EmployeeProductivity
+/**
+ *  @typedef {Object} EmployeeProductivity
  *  @property {Number} operations
  *  @property {Number} engineer
  *  @property {Number} business
@@ -8,14 +9,15 @@ import { cityNames } from "database.js"
  *  @property {Number} "research & development"
  */
 
-/** @typedef {Object} Industry
+/**
+ *  @typedef {Object} Industry
  *  @property {Number} reFac
  *  @property {Number} sciFac
  *  @property {Number} robFac
  *  @property {Number} aiFac
  *  @property {Number} advFac
  */
-//  *  @property {Number} 
+//  *  @property {Number}
 
 /** @param {import(".").NS} ns */
 export async function main(ns) {
@@ -72,27 +74,27 @@ export async function main(ns) {
 				})
 			}
 
-			// Ensure division has expanded into all cities
-			cityNames.filter((city) => !div.cities.includes(city))
-				.forEach((cityName) => {
-					if (ns.corporation.getExpandCityCost() <= ns.corporation.getCorporation().funds) {
-						const parameters = [div.name, cityName];
-						ns.print("Expanding division into city: ", parameters.join(", "));
-						ns.corporation.expandCity(...parameters);
-					}
-				});
+			// // Ensure division has expanded into all cities
+			// cityNames.filter((city) => !div.cities.includes(city))
+			// 	.forEach((cityName) => {
+			// 		if (ns.corporation.getExpandCityCost() <= ns.corporation.getCorporation().funds) {
+			// 			const parameters = [div.name, cityName];
+			// 			ns.print("Expanding division into city: ", parameters.join(", "));
+			// 			ns.corporation.expandCity(...parameters);
+			// 		}
+			// 	});
 
-			// Ensure all cities have a warehouse
-			if (hasWarehouseAPI) {
-				cityNames.filter((cityName) => !ns.corporation.hasWarehouse(div.name, cityName))
-					.forEach((cityName) => {
-						if (ns.corporation.getPurchaseWarehouseCost() <= ns.corporation.getCorporation().funds) {
-							const parameters = [div.name, cityName];
-							ns.print("Purchasing warehouse: ", parameters.join(", "));
-							ns.corporation.purchaseWarehouse(...parameters);
-						}
-					})
-			}
+			// // Ensure all cities have a warehouse
+			// if (hasWarehouseAPI) {
+			// 	cityNames.filter((cityName) => !ns.corporation.hasWarehouse(div.name, cityName))
+			// 		.forEach((cityName) => {
+			// 			if (ns.corporation.getPurchaseWarehouseCost() <= ns.corporation.getCorporation().funds) {
+			// 				const parameters = [div.name, cityName];
+			// 				ns.print("Purchasing warehouse: ", parameters.join(", "));
+			// 				ns.corporation.purchaseWarehouse(...parameters);
+			// 			}
+			// 		})
+			// }
 
 			// Manage existing offices and employees
 			if (hasOfficeAPI && ns.corporation.getCorporation().state === "EXPORT") {
@@ -255,13 +257,22 @@ export async function main(ns) {
 				}
 			}
 
+			switch (div.type) {
+				case "Agriculture":
+					// TODO
+					break;
+				case "Tobacco":
+					manageTobacco(ns, div.name);
+					break;
+			}
 		}
 
 		await ns.sleep(750);
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {Employee} emp
  *  @param {Division} division
  *  @returns {EmployeeProductivity}
@@ -286,9 +297,10 @@ function calculateProductivity(ns, emp, division) {
 	}
 }
 
-/** @param {import(".").NS} ns
+/**
+ *  @param {import(".").NS} ns
  *  @param {String} divisionName
- *  @returns {Boolean}
+ *  @returns {Boolean} Is division "established", ready for next industry in queue
  */
 function manageAgriculture(ns, divisionName) {
 	// if (!ns.corporation.hasUnlockUpgrade("Smart Supply")) ns.corporation.unlockUpgrade("Smart Supply");
@@ -298,4 +310,164 @@ function manageAgriculture(ns, divisionName) {
 	// 	ns.corporation.expandCity(divisionName, cityName);
 	// 	ns.corporation.
 	// })
+}
+
+/**
+ *  @param {import(".").NS} ns
+ *  @param {String} divisionName
+ *  @returns {Boolean} Is division "established", ready for next industry in queue
+ */
+function manageTobacco(ns, divisionName) {
+	const hasOfficeAPI = ns.corporation.hasUnlockUpgrade("Office API");
+	if (!hasOfficeAPI) return false;
+	const hasWarehouseAPI = ns.corporation.hasUnlockUpgrade("Warehouse API");
+
+	const mainCity = "Sector-12";
+	const productNames = ["Menthols", "Slims", "E-Cigs", "Golden Bats", "Water Pipe"];
+
+
+	let mainOffice = ns.corporation.getOffice(divisionName, mainCity);
+	
+	// First, hire up to 30 in main city
+	let _continue = tryMeetCondition(() => mainOffice.size >= 30,
+		() => {
+			const addSize = 30 - mainOffice.size;
+			const cost = ns.corporation.getOfficeSizeUpgradeCost(divisionName, mainCity, addSize);
+			if (ns.corporation.getCorporation().funds >= cost) {
+				ns.corporation.upgradeOfficeSize(divisionName, mainCity, addSize)
+			}
+		}
+	);
+	if (!_continue) return false;
+
+	// At least one product in development
+	if (!hasWarehouseAPI) return false;
+	_continue = tryMeetCondition(() => ns.corporation.getDivision(divisionName).products.length > 0,
+		() => {
+			const newProductInvestment = 1000000000; // $1b
+			if (ns.corporation.getCorporation().funds >= 2 * newProductInvestment) {
+				ns.corporation.makeProduct(divisionName, mainCity, productNames[0] + " v0.1", newProductInvestment, newProductInvestment);
+			}
+		}
+	);
+	if (!_continue) return false;
+
+	// At least one product completed development
+	if (ns.corporation.getDivision(divisionName).products
+		.map((productName) => ns.corporation.getProduct(divisionName, productName))
+		.filter((prod) => prod.developmentProgress >= 100).length == 0) {
+		return false;
+	}
+
+	// Ensure division has expanded into all cities
+	const allCities = cityNames;
+	_continue = tryMeetCondition(() => allCities.every((cityName) => ns.corporation.getDivision(divisionName).cities.includes(cityName)),
+		() => {
+			const div = ns.corporation.getDivision(divisionName);
+			allCities.filter((cityName) => !div.cities.includes(cityName))
+				.forEach((cityName) => {
+					if (ns.corporation.getExpandCityCost() <= ns.corporation.getCorporation().funds) {
+						doAndLog(ns, "Expanding into city", ns.corporation.expandCity, [divisionName, cityName]);
+					}
+				});
+		}
+	);
+	if (!_continue) return false;
+
+	// Every city has a warehouse and 9 staff
+	_continue = tryMeetCondition(
+		() => allCities.every((cityName) => ns.corporation.hasWarehouse(divisionName, cityName) && ns.corporation.getOffice(divisionName, cityName).size >= 9),
+		() => {
+			allCities.filter((cityName) => !(ns.corporation.hasWarehouse(divisionName, cityName) && ns.corporation.getOffice(divisionName, cityName).size >= 9))
+				.forEach((cityName) => {
+					if (!ns.corporation.hasWarehouse(divisionName, cityName)
+						&& ns.corporation.getPurchaseWarehouseCost() <= ns.corporation.getCorporation().funds) {
+						doAndLog(ns, "Purchasing warehouse", ns.corporation.purchaseWarehouse, [divisionName, cityName]);
+					}
+					const office = ns.corporation.getOffice(divisionName, cityName);
+					if (office.size < 9) {
+						ns.print("beep");
+						const hireSize = 9 - office.size;
+						if (ns.corporation.getOfficeSizeUpgradeCost(divisionName, cityName, hireSize) <= ns.corporation.getCorporation().funds) {
+							doAndLog(ns, "Upgrading office size", ns.corporation.upgradeOfficeSize, [divisionName, cityName, hireSize]);
+						}
+					}
+				});
+		}
+	)
+	if (!_continue) return false;
+
+	// Fill any empty product slots
+	const productSlotUpgrades = ["uPgrade: Capacity.I", "uPgrade: Capacity.II"];
+	const productSlots = 3 + productSlotUpgrades.map((upg) => ns.corporation.hasResearched(divisionName, upg) ? 1 : 0)
+		.reduce((a, b) => a + b, 0);
+	while (ns.corporation.getDivision(divisionName).products.length < productSlots) {
+		const newProductInvestment = 1000000000; // $1b
+		if (ns.corporation.getCorporation().funds >= 2 * newProductInvestment) {
+			doAndLog(ns, "Creating new product", ns.corporation.makeProduct, [divisionName, mainCity, productNames[ns.corporation.getDivision(divisionName).products.length] + " v0.1", newProductInvestment, newProductInvestment]);
+		}
+	}
+
+	// If all products slots are full, discontinue worst and replace
+	const products = ns.corporation.getDivision(divisionName).products.map((productName) => ns.corporation.getProduct(divisionName, productName));
+	if (products.length == productSlots && products.every((prod) => prod.developmentProgress == 100)) {
+		const worstProduct = products.sort((a, b) => a.rat - b.rat)[0];
+		const productName = worstProduct.name.split("v")[0];
+		// const log10 = Math.log10(worstProduct.rat);
+		const newVersion = ns.nFormat(Math.log10(worstProduct.rat), "0.00")
+		const newName = productName + "v" + newVersion;
+		const newProductInvestment = 1000000000; // $1b
+		if (ns.corporation.getCorporation().funds >= 2 * newProductInvestment) {
+			doAndLog(ns, "Discontinuing product", ns.corporation.discontinueProduct, [divisionName, worstProduct.name]);
+			doAndLog(ns, "Creating new product", ns.corporation.makeProduct, [divisionName, mainCity, newName, newProductInvestment, newProductInvestment]);
+		}
+	}
+
+	// Hire main city up to 69 staff
+	_continue = tryMeetCondition(
+		() => ns.corporation.getOffice(divisionName, mainCity).size >= 69,
+		() => {
+			// Hire in chunks this size
+			const startSize = ns.corporation.getOffice(divisionName, mainCity).size;
+			const chunk = 3;
+			while (ns.corporation.getOffice(divisionName, mainCity).size < 69 && ns.corporation.getOfficeSizeUpgradeCost(divisionName, mainCity, chunk) <= ns.corporation.getCorporation().funds) {
+				ns.corporation.upgradeOfficeSize(divisionName, mainCity, chunk);
+			}
+			const endSize = ns.corporation.getOffice(divisionName, mainCity).size;
+			if (endSize > startSize) {
+				ns.print("Upgraded ", mainCity, " office size to ", endSize);
+			}
+		}
+	)
+
+	// TODO: Manage upgrades
+	// 1. Wilson analytics and corp-wide upgrades
+	// 2. AdVert or +15 employees at main city
+	// 3. Hiring across other cities if needed (60 behind main city?)
+
+	return true; // Tobacco's in maintenance mode
+}
+
+/**
+ * 
+ * @param {function():boolean} conditionFunc If this predicate is false, run the execFunc
+ * @param {function():void} failConditionFunc This is executed if the condition is false on entry
+ * @returns {Boolean} True if the conditionFunc is true before or after failConditionFunc, false if the condition remains false after failConditionFunc
+ */
+function tryMeetCondition(conditionFunc, failConditionFunc) {
+	if (conditionFunc()) return true;
+	failConditionFunc();
+	return conditionFunc();
+}
+
+/**
+ * 
+ * @param {import(".").NS} ns
+ * @param {string} label
+ * @param {function()} doFunction 
+ * @param {any[]} parameters 
+ */
+function doAndLog(ns, label, doFunction, parameters) {
+	ns.print(label, ": ", parameters.join(", "));
+	doFunction(...parameters);
 }

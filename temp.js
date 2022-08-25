@@ -1,6 +1,6 @@
 // import {getCurrentBlackOp} from "burnTheBlade.js";
 // import {requireBitNodeOrSource} from "helperlib"
-// import {symbolToInfo} from "invest.js"
+// import {symbolToInfo} from "chaseAlpha.js"
 // import {cityNames} from "database.js"
 
 /** @param {import(".").NS} ns */
