@@ -43,17 +43,17 @@ export async function main(ns) {
 	}
 
 	// Starting wealth is new newly invested money plus total of stock currently held
-	const startingWealth = wallet + ns.stock.getSymbols()
-		.map((sym) => symbolToInfo(ns, sym))
-		.map((info) => info.position.longShares * info.position.longAvgPrice + info.position.shortShares * info.position.shortAvgPrice)
-		.reduce((a, b) => a + b, 0);
+	// const startingWealth = wallet + ns.stock.getSymbols()
+	// 	.map((sym) => symbolToInfo(ns, sym))
+	// 	.map((info) => info.position.longShares * info.position.longAvgPrice + info.position.shortShares * info.position.shortAvgPrice)
+	// 	.reduce((a, b) => a + b, 0);
 	const commission = 100000; // $100,000 brokerage fee on all buy and sell actions
 	const safeForecastMargin = 0.1; // Only consider stocks at least this much either side of 0.5 forecast
 	const minTransactionValue = 10000000;
 
 	
 	while (true) {
-		const allSymbols = ns.stock.getSymbols();
+		const allSymbols = ns.stock.getSymbols();//ns.read("stockSymbols.txt").split(",");
 
 		// Sell phase
 		const portfolio = allSymbols
@@ -90,16 +90,16 @@ export async function main(ns) {
 }
 
 export function divestAll(ns) {
-		const allStock = ns.stock.getSymbols()
-			.map((sym) => symbolToInfo(ns, sym));
-		// Sell long
-		allStock
-			.filter((info) => info.position.longShares > 0)
-			.forEach((info) => ns.stock.sellStock(info.sym, info.position.longShares));
-		// Sell short
-		allStock
-			.filter((info) => info.position.shortShares > 0)
-			.forEach((info) => ns.stock.sellShort(info.sym, info.position.shortShares));
+	const allStock = ns.stock.getSymbols() // ns.read("stockSymbols.txt").split(",")
+		.map((sym) => symbolToInfo(ns, sym));
+	// Sell long
+	allStock
+		.filter((info) => info.position.longShares > 0)
+		.forEach((info) => ns.stock.sellStock(info.sym, info.position.longShares));
+	// Sell short
+	allStock
+		.filter((info) => info.position.shortShares > 0)
+		.forEach((info) => ns.stock.sellShort(info.sym, info.position.shortShares));
 }
 
 /**
