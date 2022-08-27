@@ -21,7 +21,7 @@ export async function main(ns) {
 	// Sync
 	const syncThreshold = 100; // Sync up to this threshold before other activity
 	const doSync = (thisSleeve) => thisSleeve.stats.sync < syncThreshold;
-	const shockThreshold = 0; // Recover down to this threshold before other activity
+	const shockThreshold = 80; // Recover down to this threshold before other activity
 	const trainCombatSkillsTo = 100;
 	const trainingInterval = trainCombatSkillsTo / 4;
 	const trainHackingTo = 0;
@@ -38,7 +38,7 @@ export async function main(ns) {
 	const canAffordAug = (aug) => aug.cost < (ns.getPlayer().money * 0.1 / sl.getNumSleeves());
 
 	// Crime and murder
-	const doMurderRampage = () => !ns.gang.inGang() && ns.heart.break() < 54000;
+	const doMurderRampage = () => !ns.gang.inGang() && ns.heart.break() > -54000;
 
 	if (sl.getNumSleeves() == 0) {
 		const message = "ERROR: No sleeves found.";
@@ -47,9 +47,10 @@ export async function main(ns) {
 		ns.exit();
 	}
 
+	const cities = cityNames;
+
 	while (true) {
 		// Join all available factions except city factions.
-		const cities = cityNames();
 		ns.singularity.checkFactionInvitations().filter((fac) => !cities.includes(fac))
 			.forEach((fac) => ns.singularity.joinFaction(fac));
 
@@ -57,7 +58,7 @@ export async function main(ns) {
 			// First up: Manage sync
 			if (doSync(thisSleeve)) {
 				confirmOrAssignTask(ns, { type: "SYNCHRO" }, thisSleeve)
-				return;
+				continue;
 			}
 
 			// Consider augments
@@ -96,48 +97,49 @@ export async function main(ns) {
 				.sort((a, b) => Math.floor(thisSleeve.stats[a] / trainingInterval) - Math.floor(thisSleeve.stats[b] / trainingInterval));
 			if (combatStatsToTrain.length > 0) {
 				if (trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: "FIELD", factionName: fac }, thisSleeve, false))) {
-					return;
+					continue;
 				} else {
 					const stat = combatStatsToTrain[0];
 					travelTo(ns, bestGym.city, thisSleeve);
 					confirmOrAssignTask(ns, { type: "CLASS", placeType: "GYM", stat: stat, classType: "GYM" + stat.toUpperCase(), location: bestGym.name }, thisSleeve);
-					return;
+					continue;
 				}
 			}
 			if (thisSleeve.stats.hacking < trainHackingTo) {
 				if (trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: "FIELD", factionName: fac }, thisSleeve))) {
-					return;
+					continue;
 				} else {
 					travelTo(ns, bestUniversity.city, thisSleeve);
 					confirmOrAssignTask(ns, { type: "CLASS", placeType: "UNI", classType: "ALGORITHMS", location: bestUniversity.name }, thisSleeve);
-					return;
+					continue;
 				}
 			}
 			if (thisSleeve.stats.charisma < trainCharismaTo) {
 				if (trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: "FIELD", factionName: fac }, thisSleeve))) {
-					return;
+					continue;
 				} else {
 					travelTo(ns, bestUniversity.city, thisSleeve);
 					confirmOrAssignTask(ns, { type: "CLASS", placeType: "UNI", classType: "LEADERSHIP", location: bestUniversity.name }, thisSleeve);
-					return;
+					continue;
 				}
 			}
 
 			// Murder rampage
-			if (doMurderRampage() && thisSleeve.task.type !== "CRIME") {
-				confirmOrAssignTask(ns, { type: "CRIME", name: "Homicide" }, thisSleeve);
-				return;
+			if (doMurderRampage()) {
+					confirmOrAssignTask(ns, { type: "CRIME", name: "Homicide" }, thisSleeve, false);
+				continue;
 			}
 
 			// Manage shock
 			if (thisSleeve.stats.shock > shockThreshold) {
 				confirmOrAssignTask(ns, { type: "RECOVERY" }, thisSleeve);
-				return;
+				continue;
 			}
 
-			// For lack of a better idea, I'll just train up charisma, cause I wanna go to bed and I'll think about it tomorrow.
-			if (trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: "FIELD", factionName: fac }, thisSleeve))) {
-				return;
+			// For lack of a better idea, I'll just train, cause I wanna go to bed and I'll think about it tomorrow.
+			const workTypes = ["FIELD", "SECURITY", "HACKING"];
+			if (workTypes.some((workType) => trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: workType, factionName: fac }, thisSleeve, false)))) {
+				continue;
 			} else {
 				travelTo(ns, bestUniversity.city, thisSleeve);
 				confirmOrAssignTask(ns, { type: "CLASS", placeType: "UNI", classType: "LEADERSHIP", location: bestUniversity.name }, thisSleeve);
@@ -175,16 +177,15 @@ export function getSleeveData(ns, idx) {
  *  @param {import(".").NS} ns
  *  @param {SleeveTask} newTask
  *  @param {SleeveData} _sleeve
- *  @param {Boolean} reportFailure
+ *  @param {Boolean} logFailure
  *  @return {Boolean}
  */
-function confirmOrAssignTask(ns, newTask, _sleeve, reportFailure = true) {
+function confirmOrAssignTask(ns, newTask, _sleeve, logFailure = true) {
 	const sl = ns.sleeve;
 	// If newTask matches _sleeve.task in every property, no change. newTask may have extra properties which are ignored.
 	// For some tasks, like crime, this check is inadequate. We must assign regardless.
 	const ambiguousTasks = ["CRIME"];
-	if (_sleeve.task !== null
-		&& ambiguousTasks.every((_type) => _sleeve.task.type !== _type)
+	if (!ambiguousTasks.some((ambiguousType) => _sleeve.task?.type === ambiguousType)
 		&& Object.keys(_sleeve.task).every((key) => _sleeve.task[key] === newTask[key])) {
 		return true;
 	}
@@ -208,7 +209,11 @@ function confirmOrAssignTask(ns, newTask, _sleeve, reportFailure = true) {
 			break;
 
 		case "CRIME":
-			success = sl.setToCommitCrime(_sleeve.index, newTask.name);
+			// Crime is a problem; which crime is not reported.
+			// TODO github issue
+			if (_sleeve.task?.type !== "CRIME") {
+				success = sl.setToCommitCrime(_sleeve.index, newTask.name);
+			}
 			break;
 
 		case "FACTION":
@@ -222,7 +227,7 @@ function confirmOrAssignTask(ns, newTask, _sleeve, reportFailure = true) {
 		: " (" + taskDetailArray.map((key) => key + ": " + newTask[key]).join(", ") + ")";
 	const message = success ? _sleeve.name + " assigned to " + newTask.type + details
 		: "ERROR: FAILED to assign " + _sleeve.name + " to " + newTask.type + details;
-	if (success || reportFailure) {
+	if (success || logFailure) {
 		ns.print(message);
 	}
 
