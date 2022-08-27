@@ -14,7 +14,7 @@ export async function main(ns) {
 	const numFmt = "0,0.00a";
 	const pctFmt = "0,0.00%";
 	const moneyFmt = "$0,0.00a";
-	const secondsFmt = "0:00:00";
+	const secondsFmt = "[0:0]0:00";
 
 	const bonusTimeThreshold = 5000;
 
@@ -220,31 +220,33 @@ export async function main(ns) {
 
 					// NeuroFlux Governor level
 					// const nextNFGCost = ns.singularity.getAugmentationRepReq("NeuroFlux Governor");
-					const nfgLevel = -Math.round(Math.log(baseNFGCost / ns.singularity.getAugmentationRepReq("NeuroFlux Governor")) / (-Math.log(2) + Math.log(3) - 2 * Math.log(5) + Math.log(19)));
-					const nextNFGLevel = function () {
-						let i = 0;
-						while ((baseNFGCost * 1.14 ^ i) <= totalFactionRep) { i++; }
-						return i;
-					}
-					const nextNFGCost = function () {
-						return baseNFGCost * 1.14 ^ nextNFGLevel();
-					}
+					// const nfgLevel = -Math.round(Math.log(baseNFGCost / ns.singularity.getAugmentationRepReq("NeuroFlux Governor")) / (-Math.log(2) + Math.log(3) - 2 * Math.log(5) + Math.log(19)));
+					// const nextNFGLevel = function () {
+					// 	let i = 0;
+					// 	while ((baseNFGCost * 1.14 ^ i) <= totalFactionRep) { i++; }
+					// 	return i;
+					// }
+					// const nextNFGCost = function () {
+					// 	return baseNFGCost * 1.14 ^ nextNFGLevel();
+					// }
 
 					addStat(
 						"Augs",
-						span(augmentsInReach.length + "/" + augmentsAvailable.length + "+" + (Math.max(0, nextNFGLevel() - nfgLevel - 1) > 99 ? "+" : Math.max(0, nextNFGLevel() - nfgLevel - 1)), (augmentsInReach.length < augmentsAvailable.length ? whiteColour : noColour))
+						span(augmentsInReach.length + "/" + augmentsAvailable.length /* + "+" + (Math.max(0, nextNFGLevel() - nfgLevel - 1) > 99 ? "+" : Math.max(0, nextNFGLevel() - nfgLevel - 1))*/, (augmentsInReach.length < augmentsAvailable.length ? whiteColour : noColour))
 					);
 
 					const nextAug = augmentsAvailable.find((aug) => ns.singularity.getAugmentationRepReq(aug) > totalFactionRep);
-					const workStats = ns.formulas.work.factionGains(ns.getPlayer(), currentWork.factionWorkType, ns.singularity.getFactionFavor(currentWork.factionName))
-					const remainingRep = nextAug === undefined
-						? nextNFGCost()
-						: ns.singularity.getAugmentationRepReq(nextAug) - totalFactionRep;
-					const nextAugSecs = remainingRep / (workStats.reputation * 5);
-					addStat(
-						"&nbsp;Next",
-						span(ns.nFormat(nextAugSecs, secondsFmt), noColour, nextAug)
-					);
+					if (nextAug !== undefined) {
+						const workStats = ns.formulas.work.factionGains(ns.getPlayer(), currentWork.factionWorkType, ns.singularity.getFactionFavor(currentWork.factionName))
+						const remainingRep = //nextAug === undefined
+							//? nextNFGCost() :
+							ns.singularity.getAugmentationRepReq(nextAug) - totalFactionRep;
+						const nextAugSecs = remainingRep / (workStats.reputation * 5);
+						addStat(
+							"&nbsp;Next",
+							span(ns.nFormat(nextAugSecs, secondsFmt), noColour, nextAug)
+						);
+					}
 					break;
 
 				case "CRIME":
