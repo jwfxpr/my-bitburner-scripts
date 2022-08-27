@@ -37,7 +37,7 @@ export async function main(ns) {
 			const toLevel = bb.getSkillLevel(bestSkill) + 1;
 			const success = bb.upgradeSkill(bestSkill);
 			const message = (success ? `BB: Upgraded skill ` : `BB: Failed to upgrade skill `) + bestSkill + " to level " + toLevel;
-			ns.toast(message, success ? ns.enums.toast.SUCCESS : ns.enums.toast.ERROR, 30000);
+			ns.toast(message, success ? ns.enums.toast.SUCCESS : ns.enums.toast.ERROR, 10000);
 		}
 
 		// Handle city
