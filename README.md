@@ -23,12 +23,17 @@ I haven't yet bothered to implement batching, so if you're looking for that, kee
   * [x] Workforce management (hiring, allocations, training)
   * [x] Completed products immediately offered for sale
   * [ ] Research management (partially completed, research pathway still to be expanded)
-  * [ ] Product price adjustment (pre MTA.II)
-  * [ ] Purchase corporation upgrades
-  * [ ] Purchase AdVert, office size
-  * [ ] Warehouse management (bulk purchase, expand warehouses)
-  * [ ] Product management (discontinue and develop)
+  * [x] Product price adjustment (pre MTA.II)
+  * [x] Purchase corporation upgrades
+  * [x] Purchase AdVert, office size
+  * [x] Warehouse management (bulk purchase, expand warehouses)
+  * [x] Product management (discontinue and develop)
   * [ ] Consider: Keep one-time unlocks manual? What about investors, IPO?
+  * [ ] Procedural evaluation of material impact on productivity, don't just follow recipe
+  * [ ] Find solution for workforce management with large workforces without constant stuttering
+    * [ ] Externalise workforce management to second script with independent looping and timing?
+    * [ ] Impose hard cap on workforce size for any one division? This requires general solution for product divisions, not just Tobacco procedural approach
+  * [ ] Ultimately, the goal is a generalised solution for managing any industry, rather than the stepwise recipe approach currently in use
 * [ ] Smarter sleeves ([`alterCarbon.js`](alterCarbon.js))
 * [ ] Pull more shared logic into [`helperlib.js`](helperlib.js)
 * [ ] Expand [`database.js`](database.js)
