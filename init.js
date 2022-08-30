@@ -1,7 +1,7 @@
 /** @param {import(".").NS} ns */
 export async function main(ns) {
-	const growThreads = 2;
-	const megalithThreads = 20;
+	const growThreads = 1;
+	const megalithThreads = 10 * growThreads;
 	const runScripts = [
 		// Script, threads, args
 		// ["infiltration.js", 1, "--start"],
@@ -10,11 +10,11 @@ export async function main(ns) {
 		["plantTheSeeds.js", 1],
 		["reapTheHarvest.js", 1],
 		["cryHavoc.js", 1],
-		["pumpItUp.js", 1],
+		// ["pumpItUp.js", 1],
 		// ["recidivist.js", 1, "karma"],
 	];
 
-	if (ns.sleeve.getNumSleeves() > 0 && ns.getPlayer().bitNodeN != 10) // NextBN10 attempt should be without sleeves, for achievement
+	if (ns.sleeve.getNumSleeves() > 0)
 		runScripts.push(["alterCarbon.js", 1]);
 
 	if (ns.singularity.getOwnedAugmentations().includes("The Blade's Simulacrum"))
