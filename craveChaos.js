@@ -154,7 +154,8 @@ export async function main(ns) {
 	// Equipment and upgrades
 	const buyUpgradesWorthSeconds = 5; // Buy any upgrade that's less than this * gang income
 	const buyUpgradesWorthSecondsInTraining = 1; // Buy any upgrade that's less than this * gang income
-	const canAffordUsefulAugment = (aug) => ns.gang.getEquipmentCost(aug) < (ns.getPlayer().money * 0.1);
+	const buyAnyUpgradeIfThisRich = 1e12; // $1t
+	const canAffordUsefulAugment = (aug) => ns.gang.getEquipmentCost(aug) < (ns.getPlayer().money * 0.1) || ns.getPlayer().money >= buyAnyUpgradeIfThisRich;
 	const usefulAugments = ns.gang.getEquipmentNames()
 		.filter((equip) => ns.gang.getEquipmentType(equip) == "Augmentation")
 		.filter((aug) => primaryStats.some((stat) => ns.gang.getEquipmentStats(aug)[stat] >= 0))
@@ -211,7 +212,7 @@ export async function main(ns) {
 			.map((equip) => { return { name: equip, cost: ns.gang.getEquipmentCost(equip) } })
 			.forEach((equip) => memberUpgradeInfo.forEach((person) => {
 				if (!(person.upgrades.includes(equip.name))
-					&& equip.cost <= Math.min(person.maxSpend, ns.getPlayer().money)
+					&& (equip.cost <= Math.min(person.maxSpend, ns.getPlayer().money) || ns.getPlayer().money >= buyAnyUpgradeIfThisRich)
 				) {
 					ns.gang.purchaseEquipment(person.name, equip.name);
 				}
