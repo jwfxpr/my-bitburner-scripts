@@ -19,15 +19,16 @@ export async function main(ns) {
 	const sl = ns.sleeve;
 
 	// Sync
-	const syncThreshold = 100; // Sync up to this threshold before other activity
+	const syncThreshold = 100; // Sync up to this threshold before other activity. This should be skipped, assuming all memory at 100
 	const doSync = (thisSleeve) => thisSleeve.stats.sync < syncThreshold;
-	const shockThreshold = 80; // Recover down to this threshold before other activity
-	const trainCombatSkillsTo = 100;
+	const shockThreshold = 85; // Recover down to this threshold before other activity
+	const trainCombatSkillsTo = 60;
 	const trainingInterval = trainCombatSkillsTo / 4;
 	const trainHackingTo = 0;
 	const trainCharismaTo = 0;
 
 	const combatSkills = ["strength", "defense", "dexterity", "agility"];
+	const allSkills = combatSkills.concat(["hacking", "charisma"]);
 
 	// Local function to calculate a numerical index indicating an augment's net impact on interesting stats
 	const mapAugToFactor = (augName, includeFilters) => Object.entries(ns.singularity.getAugmentationStats(augName))
@@ -38,7 +39,7 @@ export async function main(ns) {
 	const canAffordAug = (aug) => aug.cost < (ns.getPlayer().money * 0.1 / sl.getNumSleeves());
 
 	// Crime and murder
-	const doMurderRampage = () => !ns.gang.inGang() && ns.heart.break() > -54000;
+	const doMurderRampage = () => ns.heart.break() > -75 || (!ns.gang.inGang() && ns.heart.break() > -54000);
 
 	if (sl.getNumSleeves() == 0) {
 		const message = "ERROR: No sleeves found.";
@@ -50,12 +51,15 @@ export async function main(ns) {
 	const cities = cityNames;
 
 	while (true) {
-		// Join all available factions except city factions.
-		ns.singularity.checkFactionInvitations().filter((fac) => !cities.includes(fac))
+		// Join all available factions except city factions (unless we already joined one, so it doesn't matter)
+		const hasJoinedCityFaction = ns.getPlayer().factions.some((fac) => cities.includes(fac));
+		ns.singularity.checkFactionInvitations().filter((fac) => hasJoinedCityFaction || !cities.includes(fac))
 			.forEach((fac) => ns.singularity.joinFaction(fac));
 
-		for (const thisSleeve of getSleeves(ns)) {
-			// First up: Manage sync
+		const maxSleevesInRecovery = 2 + getSleeves(ns).filter((_sleeve) => _sleeve.stats.shock == 0).length; // Until all sleeves are at 0 shock, this many will be in recovery at once
+		let sleevesInRecovery = 0;
+		for (let thisSleeve of getSleeves(ns)) {
+			// First up, manage sync. All sleeves should have memory 100, which should make this unneccessary, but still.
 			if (doSync(thisSleeve)) {
 				confirmOrAssignTask(ns, { type: "SYNCHRO" }, thisSleeve)
 				continue;
@@ -64,23 +68,35 @@ export async function main(ns) {
 			// Consider augments
 			if (thisSleeve.stats.shock == 0) {
 				// Compile a list of interesting augs, sorted by value for money (best to worst)
-				const augsToInclude = ["exp", "rep"];
+				const augsToInclude = ["exp", "faction_rep"];
 				if (doMurderRampage()) augsToInclude.push("crime");
-				const interestingAugs = sl.getSleevePurchasableAugs(thisSleeve.index)
-					.filter((aug) => canAffordAug(aug) && mapAugToFactor(aug.name, augsToInclude) > 1)
-					.sort((a, b) => mapAugToFactor(b.name, augsToInclude) / b.cost - mapAugToFactor(a.name, augsToInclude) / a.cost);
+				let interestingAugs = sl.getSleevePurchasableAugs(thisSleeve.index)
+					.filter((aug) => canAffordAug(aug) && mapAugToFactor(aug.name, augsToInclude) > 1);
+				if (interestingAugs.length == 0) {
+					interestingAugs = sl.getSleevePurchasableAugs(thisSleeve.index)
+						.filter((aug) => canAffordAug(aug) && mapAugToFactor(aug.name, allSkills) > 1);
+				}
 
+				
 				if (interestingAugs.length > 0) {
+					interestingAugs.sort((a, b) => mapAugToFactor(b.name, augsToInclude) / b.cost - mapAugToFactor(a.name, augsToInclude) / a.cost);
 					const buyAug = interestingAugs[0];
 					if (sl.purchaseSleeveAug(thisSleeve.index, buyAug.name)) {
 						ns.printf("Purchased augmentation %s for %s, %s.", buyAug.name, thisSleeve.name, ns.nFormat(buyAug.cost, "$0.000a"));
+						thisSleeve = getSleeveData(ns, thisSleeve.index);
 					} else {
 						ns.printf("WARNING: FAILED to purchase augmentation %s for %s, %s.", buyAug.name, thisSleeve.name, ns.nFormat(buyAug.cost, "$0.000a"));
 					}
 				}
+			}
 
-				// Refresh sleeve data and continue
-				thisSleeve = getSleeveData(ns, thisSleeve.index);
+			// Manage shock
+			if (thisSleeve.stats.shock > shockThreshold
+				|| ((sleevesInRecovery < maxSleevesInRecovery) && (thisSleeve.stats.shock > 0))
+			) {
+				confirmOrAssignTask(ns, { type: "RECOVERY" }, thisSleeve);
+				sleevesInRecovery++;
+				continue;
 			}
 
 			// Training
@@ -96,7 +112,7 @@ export async function main(ns) {
 			const combatStatsToTrain = combatSkills.filter((stat) => thisSleeve.stats[stat] < trainCombatSkillsTo)
 				.sort((a, b) => Math.floor(thisSleeve.stats[a] / trainingInterval) - Math.floor(thisSleeve.stats[b] / trainingInterval));
 			if (combatStatsToTrain.length > 0) {
-				if (trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: "FIELD", factionName: fac }, thisSleeve, false))) {
+				if (["FIELD", "SECURITY"].some((workType) => trainingFactions.some((fac) => confirmOrAssignTask(ns, { type: "FACTION", factionWorkType: workType, factionName: fac }, thisSleeve, false)))) {
 					continue;
 				} else {
 					const stat = combatStatsToTrain[0];
@@ -127,12 +143,6 @@ export async function main(ns) {
 			// Murder rampage
 			if (doMurderRampage()) {
 					confirmOrAssignTask(ns, { type: "CRIME", name: "Homicide" }, thisSleeve, false);
-				continue;
-			}
-
-			// Manage shock
-			if (thisSleeve.stats.shock > shockThreshold) {
-				confirmOrAssignTask(ns, { type: "RECOVERY" }, thisSleeve);
 				continue;
 			}
 
@@ -185,7 +195,8 @@ function confirmOrAssignTask(ns, newTask, _sleeve, logFailure = true) {
 	// If newTask matches _sleeve.task in every property, no change. newTask may have extra properties which are ignored.
 	// For some tasks, like crime, this check is inadequate. We must assign regardless.
 	const ambiguousTasks = ["CRIME"];
-	if (!ambiguousTasks.some((ambiguousType) => _sleeve.task?.type === ambiguousType)
+	if (_sleeve?.task !== null
+		&& !ambiguousTasks.some((ambiguousType) => _sleeve.task?.type === ambiguousType)
 		&& Object.keys(_sleeve.task).every((key) => _sleeve.task[key] === newTask[key])) {
 		return true;
 	}
