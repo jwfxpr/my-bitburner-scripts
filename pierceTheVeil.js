@@ -169,23 +169,17 @@ export async function main(ns) {
 					"Karma",
 					ns.nFormat(ns.heart.break(), numFmt) + ", " + ns.nFormat(player.numPeopleKilled, "0,0a")
 				);
-			// } else if (player.numPeopleKilled > 0 && !player.factions.includes("Speakers for the Dead")) {
-			// 	addStat(
-			// 		"Kills",
-			// 		span(ns.nFormat(player.numPeopleKilled, "0,0a"), player.numPeopleKilled > 30 ? whiteColour : noColour)
-			// 	);
+			} else if (player.numPeopleKilled > 0 && !player.factions.includes("Speakers for the Dead")) {
+				addStat(
+					"Kills",
+					span(ns.nFormat(player.numPeopleKilled, "0,0a"), player.numPeopleKilled >= 30 ? whiteColour : noColour)
+				);
 			}
-			// if (player.numPeopleKilled > 0 && player.numPeopleKilled < 30) {
-			// 	addStat(
-			// 		"Kills",
-			// 		player.numPeopleKilled
-			// 	);
-			// }
 
 			if (ns.getPlayer().hasCorporation) {
 				const corp = ns.corporation.getCorporation();
-				const data = corp.public ? span(bigFormat(corp.dividendEarnings, 2), moneyColour) + metricSpace(corp.dividendEarnings) + "/s"
-					: span(bigFormat(ns.corporation.getInvestmentOffer().funds, 2), moneyColour);
+				const data = corp.public ? span("$" + bigFormat(corp.dividendEarnings, 2), moneyColour) + metricSpace(corp.dividendEarnings) + "/s"
+					: span("$" + bigFormat(ns.corporation.getInvestmentOffer().funds, 2), moneyColour);
 				addStat(
 					"Corp",
 					data
@@ -263,8 +257,9 @@ export async function main(ns) {
 					break;
 				case null:
 				case undefined:
-					// TODO: This currently shows 'Idle' when doing BB actions without The Blade's Simulacrum
-					addStat(span("Idle", redColour));
+					if (ns.bladeburner.getCurrentAction().type === "Idle" || ns.singularity.getOwnedAugmentations().includes("The Blade's Simulacrum")) {
+						addStat(span("Idle", redColour));
+					}
 					break;
 				default: // Print unknown work types for investigation
 					addStat(currentWork.type, "&nbsp;");
