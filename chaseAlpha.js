@@ -48,7 +48,7 @@ export async function main(ns) {
 	// 	.map((info) => info.position.longShares * info.position.longAvgPrice + info.position.shortShares * info.position.shortAvgPrice)
 	// 	.reduce((a, b) => a + b, 0);
 	const commission = 100000; // $100,000 brokerage fee on all buy and sell actions
-	const safeForecastMargin = 0.1; // Only consider stocks at least this much either side of 0.5 forecast
+	const safeForecastMargin = 0.1; // Only consider stocks at least this much either side of 0.5 forecast. This value is adjusted based on the remaining shares.
 	const minTransactionValue = 10000000;
 
 	
@@ -72,7 +72,7 @@ export async function main(ns) {
 			.map((sym) => symbolToInfo(ns, sym))
 			.filter((info) => info.position.remainingShares > 0)
 			// Exclude stocks with a marginal forecast
-			.filter((info) => Math.abs(info.forecast - 0.5) >= safeForecastMargin)
+			.filter((info) => Math.abs(info.forecast - 0.5) >= (safeForecastMargin - (safeForecastMargin * info.position.remainingShares / info.position.maxShares / 2)))
 			// Sort by magnitude of forecast
 			.sort((a, b) => Math.abs(b.forecast - 0.5) - Math.abs(a.forecast - 0.5));
 		opportunities.forEach((info) => {
