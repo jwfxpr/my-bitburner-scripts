@@ -1,4 +1,5 @@
-import {getBestUpgradeAllNodes, nodeNameToIndex, doUpgrade} from "plantTheSeeds.js"
+import { getBestUpgradeAllNodes, nodeNameToIndex, doUpgrade } from "plantTheSeeds.js"
+import { getSleeves } from "alterCarbon.js"
 
 /** @param {import(".").NS} ns */
 export async function main(ns) {
@@ -16,7 +17,7 @@ export async function main(ns) {
 		if (ns.getPlayer().inBladeburner) {
 			burnABlade(ns);
 		}
-		if (ns.singularity.getCurrentWork()?.type === "CLASS") {
+		if (ns.singularity.getCurrentWork()?.type === "CLASS" || getSleeves(ns).some((_sleeve) => _sleeve.task?.type == "CLASS")) {
 			pushItRealGood(ns);
 		}
 		if (ns.getPlayer().skills.hacking > 500) {
