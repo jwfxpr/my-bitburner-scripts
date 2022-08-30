@@ -23,12 +23,12 @@ export async function main(ns) {
 		// "Bladeburners",
 	];
 
-	const augmentationFilter = ns.singularity.getOwnedAugmentations(true);
+	const augmentationFilter = new Set(ns.singularity.getOwnedAugmentations(true));
 	if (ns.gang.inGang()) {
-		ns.singularity.getAugmentationsFromFaction(ns.gang.getGangInformation().faction).forEach((aug) => augmentationFilter.push(aug));
+		ns.singularity.getAugmentationsFromFaction(ns.gang.getGangInformation().faction).forEach((aug) => augmentationFilter.add(aug));
 	}
-	augmentationFilter.push("NeuroFlux Governor");
-	const reallyUnique = (aug) => augmentationFilter.indexOf(aug) == -1;
+	augmentationFilter.add("NeuroFlux Governor");
+	const reallyUnique = (aug) => !augmentationFilter.has(aug);
 	const myFaction = ns.gang.inGang() ? ns.gang.getGangInformation().faction : "";
 	allFactions.filter((fac) => myFaction != fac)
 		.filter((fac) => ns.singularity.getAugmentationsFromFaction(fac).some(reallyUnique))
