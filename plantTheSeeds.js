@@ -471,7 +471,7 @@ export function getBestUpgradeForNode(ns, node) {
 			index: index,
 			node: node,
 			info: {
-				target: "core",
+				target: "cores",
 				cost: coreCost,
 				newGainRate: coreHashRate,
 				roi: (coreHashRate - currentHashRate) / coreCost,
@@ -489,7 +489,7 @@ export function doUpgrade(ns, upgrade) {
 	const upgradeMap = {
 		level: ns.hacknet.upgradeLevel,
 		ram: ns.hacknet.upgradeRam,
-		core: ns.hacknet.upgradeCore,
+		cores: ns.hacknet.upgradeCore,
 		cache: ns.hacknet.upgradeCache,
 	};
 	if (Object.keys(upgradeMap).includes(upgrade.info.target)) {
