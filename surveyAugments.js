@@ -22,15 +22,16 @@ export async function main(ns) {
 		// "Shadows of Anarchy",
 		// "Bladeburners",
 	];
+	const numFmt = "0.000a";
 
 	const augmentationFilter = new Set(ns.singularity.getOwnedAugmentations(true));
-	if (ns.gang.inGang()) {
+	if (ns.gang.inGang() && textFilter === "") {
 		ns.singularity.getAugmentationsFromFaction(ns.gang.getGangInformation().faction).forEach((aug) => augmentationFilter.add(aug));
 	}
 	augmentationFilter.add("NeuroFlux Governor");
 	const reallyUnique = (aug) => !augmentationFilter.has(aug);
-	const myFaction = ns.gang.inGang() ? ns.gang.getGangInformation().faction : "";
-	allFactions.filter((fac) => myFaction != fac)
+	const myFaction = ns.gang.inGang() && textFilter === "" ? ns.gang.getGangInformation().faction : "";
+	let factionAugs = allFactions.filter((fac) => myFaction != fac)
 		.filter((fac) => ns.singularity.getAugmentationsFromFaction(fac).some(reallyUnique))
 		.map((fac) => {
 			return {
@@ -39,15 +40,30 @@ export async function main(ns) {
 					.filter(reallyUnique)
 					.map((aug) => { return { augment: aug, stats: ns.singularity.getAugmentationStats(aug) } })
 			}
+		});
+	// Apply text filter and reduce list
+	if (textFilter !== "") {
+		factionAugs.forEach((fac, facIdx) => {
+			fac.uniqueAugments.forEach((aug, augIdx) => {
+				const newStats = aug.stats;
+				Object.entries(aug.stats).filter((stat) => stat[1] === 1 || !stat[0].includes(textFilter)).forEach((stat) => delete newStats[stat[0]]);
+				factionAugs[facIdx].uniqueAugments[augIdx].stats = newStats;
+			});
+			fac.uniqueAugments = fac.uniqueAugments.filter((aug) => Object.entries(aug.stats).length > 0);
 		})
-		.forEach((fac) => {
+		factionAugs = factionAugs.filter((fac) => fac.uniqueAugments.length > 0);
+	}
+	// Print list
+	factionAugs.forEach((fac) => {
 			ns.tprint(fac.name,
-				ns.getPlayer().factions.includes(fac.name) ? " ⭐"
+				ns.getPlayer().factions.includes(fac.name) ? (ns.gang.getGangInformation().faction === fac.name ? " 🥊" : " ⭐") + " " + ns.nFormat(ns.singularity.getFactionRep(fac.name), numFmt)
 					: ns.singularity.checkFactionInvitations().includes(fac.name) ? " 📝" : ""
 			);
-			fac.uniqueAugments.forEach((aug) => {
-				ns.tprint('\t', aug.augment, "\t$", ns.nFormat(ns.singularity.getAugmentationPrice(aug.augment), "0.000a"));
-				ns.tprint("\t\t" + Object.entries(aug.stats).filter((stat) => stat[1] !== 1 && stat[0].includes(textFilter)).map((stat) => stat[0] + ": " + stat[1]).join(", "));
+		fac.uniqueAugments
+			.sort((a, b) => ns.singularity.getAugmentationRepReq(a.augment) - ns.singularity.getAugmentationRepReq(b.augment))
+			.forEach((aug) => {
+				ns.tprint('\t', aug.augment, "\t$", ns.nFormat(ns.singularity.getAugmentationPrice(aug.augment), numFmt), ", ", ns.nFormat(ns.singularity.getAugmentationRepReq(aug.augment), numFmt));
+				ns.tprint("\t\t" + Object.entries(aug.stats).filter((stat) => stat[1] !== 1 /*&& stat[0].includes(textFilter)*/).map((stat) => stat[0] + ": " + stat[1]).join(", "));
 			});
 		});
 }
