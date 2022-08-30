@@ -398,9 +398,9 @@ function manageAgriculture(ns, divisionName) {
 			const div = ns.corporation.getDivision(divisionName);
 			allCities.filter((cityName) => !div.cities.includes(cityName))
 				.forEach((cityName) => {
-					if (canAfford(ns, ns.corporation.getExpandCityCost() /*+ ns.corporation.getPurchaseWarehouseCost()*/)) {
+					if (canAfford(ns, ns.corporation.getExpandCityCost() + ns.corporation.getPurchaseWarehouseCost())) {
 						doAndLog(ns, "Expanding into city", ns.corporation.expandCity, [divisionName, cityName]);
-						// doAndLog(ns, "Purchasing warehouse", ns.corporation.purchaseWarehouse, [divisionName, cityName]);
+						doAndLog(ns, "Purchasing warehouse", ns.corporation.purchaseWarehouse, [divisionName, cityName]);
 					}
 				});
 		}
@@ -461,7 +461,7 @@ function manageAgriculture(ns, divisionName) {
 		) && _continue;
 
 		// Ensure bulk purchase researched
-		// TODO this needs work, bulk purchase requirement is onerous. Need logic for cyclic purchasing.
+		// TODO this needs work, bulk purchase requirement is onerous. Need logic for cyclic purchasing. Beware bonus time.
 		const hasBulkPurchase = ns.corporation.hasResearched(divisionName, "Bulk Purchasing");
 		if (!hasBulkPurchase) return false;
 
@@ -496,7 +496,7 @@ function manageAgriculture(ns, divisionName) {
 		// if (!_continue) return false;
 	}
 
-	// Ensure at least on AdVert bought. (Is this a continuation condition? Are we okay without this if necessary?)
+	// Ensure at least one AdVert bought. (Is this a continuation condition? Are we okay without this if necessary?)
 	_continue = tryMeetCondition(() => ns.corporation.getHireAdVertCount(divisionName) >= 1,
 		() => {
 			if (canAfford(ns, ns.corporation.getHireAdVertCost(divisionName))) {
@@ -625,15 +625,15 @@ function manageAgriculture(ns, divisionName) {
 		const allFull = tryMeetCondition(
 			() => warehousesToFill.every((cityName) => materialsExpected.every((mat) => ns.corporation.getMaterial(divisionName, cityName, mat[0]).qty >= mat[1])),
 			() => {
-				materialsExpected.forEach((mat) => {
+				materialsExpected.forEach((purchaseOrder) => {
 					warehousesToFill.forEach((cityName) => {
-						const shortfall = mat[1] - ns.corporation.getMaterial(divisionName, cityName, mat[0]).qty;
-						if (shortfall > 0)
-							ns.corporation.bulkPurchase(divisionName, cityName, mat[0], shortfall);
+						const material = ns.corporation.getMaterial(divisionName, cityName, purchaseOrder[0]);
+						const shortfall = purchaseOrder[1] - material.qty;
+						if (shortfall > 0 && canAfford(ns, material.cost * shortfall))
+							ns.corporation.bulkPurchase(divisionName, cityName, purchaseOrder[0], shortfall);
 					});
 				});
-			}
-		);
+			});
 
 		if (!(_continue && allFull)) return false;
 	}
